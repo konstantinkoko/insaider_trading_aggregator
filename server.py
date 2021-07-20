@@ -3,12 +3,13 @@ import requests
 
 from database_operations import *
 from parcer import show_trading_info
-import config, messages
+from config import *
+import messages
 
 app = Flask(__name__)
 
 def get_api_url(method):
-    api_url = f"https://api.telegram.org/bot{config.TELEGRAM_TOKEN}/{method}"
+    api_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/{method}"
     return api_url
 
 def send_message(chat_id, content):
@@ -49,4 +50,7 @@ def message():
     return {"ok": True}
 
 if __name__ == '__main__':
+
+    db_initialization()
+    set_webhook()
     app.run()
