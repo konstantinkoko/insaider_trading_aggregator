@@ -1,5 +1,4 @@
 from flask import Flask, request
-import requests
 
 from database_operations import *
 from parcer import show_trading_info
@@ -20,7 +19,7 @@ def send_message(chat_id, content):
 
 @app.route('/', methods=["POST"])
 def message():
-    id = request.json["message"]["from"]["id"]
+    user_id = request.json["message"]["from"]["id"]
     name = request.json["message"]["from"]["first_name"]
     chat_id = request.json["message"]["chat"]["id"]
 
@@ -32,16 +31,16 @@ def message():
         if text_list[0] == "/help":
             content = messages.help_message
         elif text_list[0] == "/start":
-            add_user(id, name)
+            add_user(user_id, name)
             content = messages.welcome_message
         elif text_list[0] == "/companies":
-            content = get_companies_list(id)
+            content = get_companies_list(user_id)
         elif text_list[0] == "/add" and len(text_list) > 1:
-            content = add_company(id, text_list[1])
+            content = add_company(user_id, text_list[1])
         elif text_list[0] == "/del" and len(text_list) > 1:
-            content = delete_company(id, text_list[1])
+            content = delete_company(user_id, text_list[1])
         elif text_list[0] == "/time" and len(text_list) > 1:
-            content = set_notification_time(text_list[1])
+            content = set_notification_time(user_id, text_list[1])
         elif text_list[0] == "/show" and len(text_list) > 1:
             content = show_trading_info(text_list[1])
 
