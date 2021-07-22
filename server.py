@@ -7,15 +7,18 @@ import messages
 
 app = Flask(__name__)
 
+
 def get_api_url(method):
     api_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/{method}"
     return api_url
+
 
 def send_message(chat_id, content):
     method = "sendMessage"
     url = get_api_url(method)
     data = {"chat_id": chat_id, "text": content}
     requests.post(url, data=data)
+
 
 @app.route('/', methods=["POST"])
 def message():
@@ -42,14 +45,14 @@ def message():
         elif text_list[0] == "/time" and len(text_list) > 1:
             content = set_notification_time(user_id, text_list[1])
         elif text_list[0] == "/show" and len(text_list) > 1:
-            content = show_trading_info(text_list[1])
+            content = show_trading_info(text_list[1], "year")
 
         send_message(chat_id, content)
 
     return {"ok": True}
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     db_initialization()
     set_webhook()
     app.run()
