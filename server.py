@@ -15,8 +15,12 @@ def get_api_url(method):
 
 def send_message(chat_id, content):
     method = "sendMessage"
+    if type(content) is list:
+        _content = '\n'.join(content)
+    else:
+        _content = content
     url = get_api_url(method)
-    data = {"chat_id": chat_id, "text": content}
+    data = {"chat_id": chat_id, "text": _content}
     requests.post(url, data=data)
 
 

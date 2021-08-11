@@ -1,6 +1,6 @@
 import sqlite3 as sql
 
-from parcer import show_trading_info
+from parcer import show_trading_info, ticker_check
 
 
 def db_initialization():
@@ -43,16 +43,21 @@ def get_companies_list(user_id):
                 WHERE user_id = ?;
                 """, (user_id,))
         data = cursor.fetchall()
-    return str(data)
+        content = [company[1] for company in data]
+    return content
 
 
 def add_company(user_id, ticker):
-    with sql.connect("i_t_aggregator_db") as connect:
-        connect.execute("""
-            INSERT OR IGNORE INTO users_companies (user_id, ticker)
-            VALUES(?,?)
-        """, (user_id, ticker))
-    return "ok"
+    ticker_info = ticker_check(ticker)
+    ticker = ticker_info[0]
+    status = ticker_info[2]
+    if ticker_info[1]:
+        with sql.connect("i_t_aggregator_db") as connect:
+            connect.execute("""
+                INSERT OR IGNORE INTO users_companies (user_id, ticker)
+                VALUES(?,?)
+            """, (user_id, ticker))
+    return status
 
 
 def delete_company(user_id, ticker):
@@ -61,7 +66,8 @@ def delete_company(user_id, ticker):
             DELETE FROM users_companies
             WHERE user_id = ? AND ticker = ?;
         """, (user_id, ticker))
-    return "ok"
+        status = "ok"
+    return status
 
 
 def set_notification_time(user_id, time):
@@ -71,7 +77,8 @@ def set_notification_time(user_id, time):
             SET notification_time = ?
             WHERE user_id = ?
         """, (time, user_id))
-    return "ok"
+        status = "ok"
+    return status
 
 
 def notifications():
@@ -85,6 +92,7 @@ def notifications():
         user_id = user_info[0]
         notification_time = user_info[2]
         companies_list = [get_companies_list(user_id)[i][1] for i in range(len(data))]
+        content = []
         for ticker in companies_list:
-            content = show_trading_info(ticker, "day")
-    return
+            content.append(show_trading_info(ticker, "day"))
+    return content
