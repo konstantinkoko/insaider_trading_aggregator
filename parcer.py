@@ -64,36 +64,3 @@ def event_list(company_id, year):
             info.append(f"date: {date}\ntime: {time}\nevent_url: {event_info_url}\n\n")
     info.reverse()
     return info
-
-
-def company_name_format(company_name):
-    exception_list = ['ао', 'ao', 'оао', 'oao', 'зао', 'пао', 'ооо', 'ooo', '"', "«", "»", '']
-    separator_list = ['"', "«", "»"]
-    _company_name = [i.strip('«»"().,').strip('«»"().,') for i in company_name.lower().split()]
-    company_name = ' '.join(_company_name)
-    for symbol in separator_list:
-        _company_name = company_name.split(symbol)
-        company_name = ' '.join(_company_name)
-
-    _company_name = company_name.split()
-    company_name = ' '
-    for i in _company_name:
-        if i not in exception_list:
-            if company_name[-1] != '-' and i[0] != '-':
-                company_name += " " + i
-            else:
-                company_name += i
-    return company_name.strip()
-
-
-def show_trading_info(ticker, period):
-    ticker_info = ticker_check(ticker)  # [ticker_format, right_check, status, company_name]
-    ticker = ticker_info[0]
-    status = ticker_info[2]
-    company_name = ticker_info[3]
-    if ticker_info[1]:
-        company_id = get_company_id(ticker, company_name)
-        info = event_list(company_id, year=2020)
-    else:
-        info = status
-    return info

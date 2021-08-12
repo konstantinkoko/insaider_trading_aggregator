@@ -1,7 +1,8 @@
 from flask import Flask, request
 
-from database_operations import *
-from parcer import show_trading_info
+from bot_operations import add_user, get_companies_list, add_company, delete_company, set_notification_time, \
+    show_trading_info
+from database_operations import db_initialization
 from config import *
 import messages
 
