@@ -6,6 +6,7 @@ import sqlite3 as sql
 def company_name_format(company_name):
     exception_list = ['ао', 'ao', 'оао', 'oao', 'зао', 'пао', 'ооо', 'ooo', '"', "«", "»", '']
     separator_list = ['"', "«", "»"]
+    dash_list = ['-', '–', '—']
     _company_name = [i.strip('«»"().,').strip('«»"().,') for i in company_name.lower().split()]
     company_name = ' '.join(_company_name)
     for symbol in separator_list:
@@ -14,9 +15,10 @@ def company_name_format(company_name):
 
     _company_name = company_name.split()
     company_name = ' '
+    #print(_company_name)
     for i in _company_name:
         if i not in exception_list:
-            if company_name[-1] != '-' and i[0] != '-':
+            if (company_name[-1] not in dash_list) and (i[0] not in dash_list):
                 company_name += " " + i
             else:
                 company_name += i
@@ -24,7 +26,7 @@ def company_name_format(company_name):
 
 
 flag = True
-id = 2751
+id = 11922
 #38312
 
 while id < 38312:

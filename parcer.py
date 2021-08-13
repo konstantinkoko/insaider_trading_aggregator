@@ -19,17 +19,26 @@ def ticker_check(ticker):
     return [ticker, right_check, status, company_name]
 
 
-def make_event_info(event_info_url, date, time):
+def make_event_info(event_info_url):
 
-    info_dict = {'date': date, 'time': time, 'event_info_url': event_info_url}
+    info_dict = {}
     r = requests.get(event_info_url)
 
     soup = BeautifulSoup(r.text, 'html.parser')
     info = soup.find("div", style="word-break: break-word; word-wrap: break-word;")
+    text_list = []
     for br in info.find_all('br'):
-        text = br.next_sibling
-        if str(text)[:4] =='2.1.':
-            info_dict['name'] = ' '.join(text.strip('.').split()[-3:])
+        text_list.append(str(br.next_sibling))
+    print(text_list)
+    for i, string in enumerate(text_list):
+        if string[:4] == '2.1.':
+            info_dict['name'] = text_list[i + 1].strip('.')
+    '''
+        if text_list[0] =='2.1.':
+            pass
+            #info_dict['name'] = str(text_list[i+1])
+            #info_dict['name'] = ' '.join(text.strip('.').split()[-3:])
+            
         if str(text)[:4] =='2.2.':
             info_dict['post'] = ' '.join(text.strip('.').split()[14:])
         if str(text)[:4] == '2.4.':
@@ -42,6 +51,7 @@ def make_event_info(event_info_url, date, time):
             for i in text.split():
                 if '%' in i:
                     info_dict['after'].append(i.strip('–.'))
+                    '''
     return info_dict
 
 
@@ -57,10 +67,13 @@ def event_list(company_id, year):
             date = columns[1].text.split()[0]
             time = columns[1].text.split()[1]
             event_info_url = columns[2].a['href']
-            #try:
-            #    info.append(make_event_info(event_info_url, date, time))
-            #except:
-            #    info.append('no data')
-            info.append(f"date: {date}\ntime: {time}\nevent_url: {event_info_url}\n\n")
+            name = '-------'
+            try:
+                info_dict = make_event_info(event_info_url)
+                if 'name' in info_dict:
+                    name = info_dict['name']
+            except:
+                pass
+            info.append(f"date: {date}\ntime: {time}\nname: {name}\nevent_url: {event_info_url}\n\n")
     info.reverse()
     return info
