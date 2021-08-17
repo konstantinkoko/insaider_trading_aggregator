@@ -1,10 +1,11 @@
+from config import DEFAULT_NOTIFICATION_TIME
 from database_operations import db_add_user, db_get_companies_list, db_add_company, db_delete_company, \
     db_set_notification_time, db_get_company_id
 from parcer import event_list, ticker_check
 
 
-def add_user(user_id, name):
-    db_add_user(user_id, name)
+def add_user(user_id, name, notification_time, chat_id):
+    db_add_user(user_id, name, notification_time, chat_id)
 
 
 def get_companies_list(user_id):
@@ -24,6 +25,10 @@ def add_company(user_id, ticker):
 def delete_company(user_id, ticker):
     status = db_delete_company(user_id, ticker)
     return status
+
+
+def set_notification(user_id, notification_time):
+    pass
 
 
 def set_notification_time(user_id, time):
@@ -62,3 +67,11 @@ def company_name_format(company_name):
             else:
                 company_name += i
     return company_name.strip(' -')
+
+
+def notification_info(user_id):
+    companies_list = db_get_companies_list(user_id)
+    content = []
+    for ticker in companies_list:
+        content.append("\n".join(show_trading_info(ticker, period='day')))
+    return content

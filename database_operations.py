@@ -1,12 +1,14 @@
 import sqlite3 as sql
 
+
 def db_initialization():
     with sql.connect("i_t_aggregator_db") as connect:
         connect.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 user_id INTEGER PRIMARY KEY,
                 name TEXT,
-                notification_time TEXT
+                notification_time TEXT,
+                chat_id INTEGER
                 );
             """)
         connect.execute("""
@@ -25,12 +27,22 @@ def db_initialization():
             """)
 
 
-def db_add_user(user_id, name):
+def db_add_user(user_id, name, notification_time, chat_id):
     with sql.connect("i_t_aggregator_db") as connect:
         connect.execute("""
-            INSERT OR IGNORE INTO users (user_id, name, notification_time)
-            VALUES(?,?,?)
-            """, (user_id, name, "08:00"))
+            INSERT OR IGNORE INTO users (user_id, name, notification_time, chat_id)
+            VALUES(?,?,?,?)
+            """, (user_id, name, notification_time, chat_id))
+
+
+def db_get_users_list():
+    with sql.connect("i_t_aggregator_db") as connect:
+        cursor = connect.execute("""
+                SELECT * FROM users;
+                """)
+        data = cursor.fetchall()
+        content = [user for user in data]
+    return content
 
 
 def db_get_companies_list(user_id):
@@ -83,21 +95,3 @@ def db_get_company_id(ticker, company_name):
     company_id = data[0][0]
     return company_id
 
-
-'''
-def notifications():
-    with sql.connect("i_t_aggregator_db") as connect:
-        cursor = connect.execute("""
-                SELECT * FROM users;
-                """)
-        data = cursor.fetchall()
-
-    for user_info in data:
-        user_id = user_info[0]
-        notification_time = user_info[2]
-        companies_list = [db_get_companies_list(user_id)[i][1] for i in range(len(data))]
-        content = []
-        for ticker in companies_list:
-            content.append(show_trading_info(ticker, "day"))
-    return content
-'''

@@ -1,10 +1,16 @@
+import requests
+import schedule
+
+from time import sleep
+from threading import Thread
 from flask import Flask, request
 
 from bot_operations import add_user, get_companies_list, add_company, delete_company, set_notification_time, \
-    show_trading_info
-from database_operations import db_initialization
-from config import *
+    show_trading_info, notification_info
+from config import set_webhook, TELEGRAM_TOKEN, DEFAULT_NOTIFICATION_TIME
+from database_operations import db_initialization, db_get_users_list
 import messages
+
 
 app = Flask(__name__)
 
@@ -25,6 +31,26 @@ def send_message(chat_id, content):
     requests.post(url, data=data)
 
 
+def send_notification_message(chat_id, content):
+    send_message(chat_id, content)
+    return schedule.CancelJob
+
+
+def send_notifications():
+    schedule.every().day.at("01:10").do(notification_schedule)
+
+    while True:
+        schedule.run_pending()
+        sleep(10)
+
+
+def notification_schedule():
+    users_list = db_get_users_list()
+    for user in users_list:
+        content = notification_info(user[0])
+        schedule.every().day.at(user[2]).do(send_notification_message, chat_id=user[3], content=content)
+
+
 @app.route('/', methods=["POST"])
 def message():
     user_id = request.json["message"]["from"]["id"]
@@ -39,7 +65,7 @@ def message():
         if text_list[0] == "/help":
             content = messages.help_message
         elif text_list[0] == "/start":
-            add_user(user_id, name)
+            add_user(user_id, name, DEFAULT_NOTIFICATION_TIME, chat_id)
             content = messages.welcome_message
         elif text_list[0] == "/companies":
             content = get_companies_list(user_id)
@@ -58,6 +84,12 @@ def message():
 
 
 if __name__ == '__main__':
-    db_initialization()
+
     set_webhook()
+
+    db_initialization()
+
+    notification_thread = Thread(target=send_notifications)
+    notification_thread.start()
+
     app.run()
