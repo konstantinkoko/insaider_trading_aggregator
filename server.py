@@ -76,7 +76,8 @@ def message():
         elif text_list[0] == "/time" and len(text_list) > 1:
             content = set_notification_time(user_id, text_list[1])
         elif text_list[0] == "/show" and len(text_list) > 1:
-            content = show_trading_info(text_list[1], "year")
+            period = "year"
+            content = show_trading_info(text_list[1], period)
 
         send_message(chat_id, content)
 

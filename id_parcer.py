@@ -26,7 +26,7 @@ def company_name_format(company_name):
 
 
 flag = True
-id = 11922
+id = 22102
 #38312
 
 while id < 38312:

@@ -1,4 +1,5 @@
 import requests
+from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 
 def ticker_check(ticker):
@@ -43,29 +44,10 @@ def make_event_info(event_info_url):
     #print(after, float(after))
     #print(after - before)
     info_dict['delta'] = 'ololo'
-    '''
-        if text_list[0] =='2.1.':
-            pass
-            #info_dict['name'] = str(text_list[i+1])
-            #info_dict['name'] = ' '.join(text.strip('.').split()[-3:])
-            
-        if str(text)[:4] =='2.2.':
-            info_dict['post'] = ' '.join(text.strip('.').split()[14:])
-        if str(text)[:4] == '2.4.':
-            info_dict['before'] = []
-            for i in text.split():
-                if '%' in i:
-                    info_dict['before'].append(i.strip('–.'))
-        if str(text)[:4] == '2.5.':
-            info_dict['after'] = []
-            for i in text.split():
-                if '%' in i:
-                    info_dict['after'].append(i.strip('–.'))
-                    '''
     return info_dict
 
 
-def event_list(company_id, year):
+def event_list(company_id, year, period):
     r = requests.get('https://e-disclosure.ru/Event/Page?companyId=' + str(company_id) + '&year=' + str(year))
 
     soup = BeautifulSoup(r.text, 'html.parser')
@@ -77,11 +59,19 @@ def event_list(company_id, year):
             date = columns[1].text.split()[0]
             time = columns[1].text.split()[1]
             event_info_url = columns[2].a['href']
-            try:
-                info_dict = make_event_info(event_info_url)
-            except:
-                info_dict = {'name': '-------', 'post': '-------', 'delta': '-------'}
-            info.append(f"date: {date}\ntime: {time}\nname: {info_dict['name']}\npost: {info_dict['post']}\n"
-                        f"delta: {info_dict['delta']}\nevent_url: {event_info_url}\n\n")
+
+            period_check = True
+            time_delta = timedelta(days=1)
+            if period == "day" and\
+                    datetime.strptime(date + " " + time, "%d.%m.%Y %H:%M") + time_delta < datetime.today():
+                period_check = False
+
+            if period_check is True:
+                try:
+                    info_dict = make_event_info(event_info_url)
+                except:
+                    info_dict = {'name': '-------', 'post': '-------', 'delta': '-------'}
+                info.append(f"date: {date}\ntime: {time}\nname: {info_dict['name']}\npost: {info_dict['post']}\n"
+                            f"delta: {info_dict['delta']}\nevent_url: {event_info_url}\n\n")
     info.reverse()
     return info

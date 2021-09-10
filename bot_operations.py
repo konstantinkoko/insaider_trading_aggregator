@@ -1,4 +1,4 @@
-from config import DEFAULT_NOTIFICATION_TIME
+from config import CURRENT_YEAR
 from database_operations import db_add_user, db_get_companies_list, db_add_company, db_delete_company, \
     db_set_notification_time, db_get_company_id
 from parcer import event_list, ticker_check
@@ -43,7 +43,7 @@ def show_trading_info(ticker, period):
     company_name = company_name_format(ticker_info[3])
     if ticker_info[1]:
         company_id = db_get_company_id(ticker, company_name)
-        info = event_list(company_id, year=2020)
+        info = event_list(company_id, CURRENT_YEAR, period)
     else:
         info = status
     return info
@@ -70,7 +70,7 @@ def company_name_format(company_name):
 
 
 def notification_info(user_id):
-    companies_list = db_get_companies_list(user_id)
+    companies_list = get_companies_list(user_id)
     content = []
     for ticker in companies_list:
         content.append("\n".join(show_trading_info(ticker, period='day')))
